@@ -1,11 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAIN</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/stylesheet.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAIN</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:    #ED1C24;
+    --yellow: #FFF200;
+    --blue:   #3F48CC;
+    --black:  #000000;
+    --dim:    #5a5a5a;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    background: var(--black);
+    min-height:100vh;
+  }
+
+  body{
+    position:relative;
+    font-family:'VT323', monospace;
+    color:#ccc;
+    overflow-x:hidden;
+  }
+
+  /* ---------- FULL-PAGE CRT OVERLAYS ---------- */
+  .overlay{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:50;
+  }
+
+  .overlay.scanlines{
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.05) 0px,
+      rgba(255,255,255,0.05) 1px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0) 3px
+    );
+    mix-blend-mode: overlay;
+    animation: scan 8s linear infinite;
+  }
+
+  .overlay.vignette{
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
+  }
+
+  .overlay.flicker{
+    background: rgba(255,255,255,0.02);
+    animation: flicker 6s infinite;
+  }
+
+  @keyframes scan{
+    0%{ background-position-y: 0; }
+    100%{ background-position-y: 100px; }
+  }
+
+  @keyframes flicker{
+    0%, 96%, 100%{ opacity: 0; }
+    97%{ opacity: 1; }
+    98%{ opacity: 0.3; }
+    99%{ opacity: 0.8; }
+  }
+
+  /* ---------- PAGE CONTENT ---------- */
+  .page{
+    max-width:1200px;
+    margin: 0 auto;
+    padding: 6vh 4vw;
+    min-height: 100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    animation: powerOn 1.1s ease-out both;
+    transform-origin: center;
+  }
+
+  @keyframes powerOn{
+    0%{ transform: scaleY(0.02); opacity:0; filter: brightness(3); }
+    40%{ transform: scaleY(1.02); opacity:1; }
+    55%{ transform: scaleY(0.98); }
+    70%{ transform: scaleY(1); filter: brightness(1.4); }
+    100%{ transform: scaleY(1); filter: brightness(1); }
+  }
+
+  /* ---------- TOP NAV: word / title / word ---------- */
+  .topnav{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas: "left title right";
+    align-items:center;
+    gap: clamp(1rem, 4vw, 3rem);
+  }
+
+  h1.title{
+    grid-area:title;
+    font-family:'Press Start 2P', monospace;
+    text-align:center;
+    font-size: clamp(1.2rem, 4.6vw, 2.6rem);
+    letter-spacing: 2px;
+    line-height:1.4;
+    margin:0;
+    user-select:none;
+  }
+
+  .c-red    { color: var(--red);    text-shadow: 0 0 6px rgba(237,28,36,0.7), 2px 0 var(--blue), -2px 0 var(--yellow); }
+  .c-yellow { color: var(--yellow); text-shadow: 0 0 6px rgba(255,242,0,0.7), 2px 0 var(--red),  -2px 0 var(--blue); }
+  .c-blue   { color: var(--blue);   text-shadow: 0 0 6px rgba(63,72,204,0.8),  2px 0 var(--yellow),-2px 0 var(--red); }
+
+  .nav-word{
+    background:none;
+    border:none;
+    padding:6px 2px;
+    cursor:pointer;
+    font-family:'Press Start 2P', monospace;
+    font-size: clamp(0.6rem, 1.6vw, 0.9rem);
+    letter-spacing:2px;
+    line-height:1.6;
+    text-align:center;
+    -webkit-tap-highlight-color: transparent;
+    transition: filter 0.15s ease, transform 0.15s ease;
+  }
+  .nav-word.left{ grid-area:left; justify-self:end; }
+  .nav-word.right{ grid-area:right; justify-self:start; }
+
+  .nav-word:hover, .nav-word:focus-visible{
+    filter: brightness(1.4);
+    transform: translateY(-2px);
+  }
+
+  .nav-word.active{
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+
+  @media (max-width: 640px){
+    .topnav{
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "title title"
+        "left  right";
+      row-gap: 2rem;
+    }
+    .nav-word.left{ justify-self:center; }
+    .nav-word.right{ justify-self:center; }
+  }
+
+  /* ---------- POPUP BOX ---------- */
+  .backdrop{
+    position:fixed;
+    inset:0;
+    background: rgba(0,0,0,0.7);
+    z-index:90;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.25s ease;
+  }
+  .backdrop.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .popup{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%) scale(0.94);
+    width:min(640px, 88vw);
+    max-height:78vh;
+    overflow-y:auto;
+    background: var(--black);
+    border: 4px solid var(--blue);
+    box-shadow:
+      0 0 0 4px var(--yellow),
+      0 0 0 8px var(--red);
+    z-index:100;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    padding: 2.4rem 1.6rem 1.6rem;
+  }
+  .popup.open{
+    opacity:1;
+    transform: translate(-50%,-50%) scale(1);
+    pointer-events:auto;
+  }
+
+  .popup .close-btn{
+    position:absolute;
+    top:8px;
+    right:12px;
+    background:none;
+    border:none;
+    color: var(--dim);
+    font-family:'Press Start 2P', monospace;
+    font-size:1rem;
+    cursor:pointer;
+    line-height:1;
+    padding:6px;
+  }
+  .popup .close-btn:hover{ color:#fff; }
+
+  .popup h2{
+    font-family:'Press Start 2P', monospace;
+    font-size:1rem;
+    letter-spacing:2px;
+    margin: 0 0 1.2rem;
+  }
+
+  .popup p{
+    font-size:1.3rem;
+    line-height:1.5;
+    color:#ccc;
+    margin:0 0 1rem;
+  }
+
+  /* ---------- SOCIAL ICONS ---------- */
+  .socials{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom: clamp(1rem, 4vh, 2.4rem);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap: clamp(1.2rem, 4vw, 2.2rem);
+    z-index:60;
+  }
+
+  .social-icon{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:2.4rem;
+    height:2.4rem;
+    text-decoration:none;
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+
+  .social-icon:hover, .social-icon:focus-visible{
+    transform: translateY(-3px) scale(1.1);
+  }
+
+  .icon-mask{
+    display:block;
+    width: 1.9rem;
+    height: 1.9rem;
+    background: linear-gradient(135deg, var(--red) 0%, var(--yellow) 50%, var(--blue) 100%);
+    -webkit-mask-image: var(--icon);
+    mask-image: var(--icon);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  .social-icon.secret{
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.5s ease;
+  }
+  .social-icon.secret.revealed{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  #secretSpot{
+    position:fixed;
+    top: 47px;
+    left: 133px;
+    width: 46px;
+    height: 58px;
+    z-index:55;
+    cursor:default;
+    background:transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .page, .overlay.flicker, .overlay.scanlines{ animation: none !important; }
+    .popup, .backdrop, .nav-word, .social-icon{ transition: none !important; }
+  }
+</style>
 </head>
 <body>
 
@@ -14,22 +302,120 @@
   <div class="overlay flicker"></div>
 
   <div class="page">
-    <h1 class="title">
-      <span class="c-red">TYR</span><span class="c-yellow">OMAN</span><span class="c-blue">IAC</span>
-    </h1>
+    <div class="topnav">
+      <button class="nav-word left tri-text" data-target="about">ABOUT</button>
 
-    <div class="box">
-      <div class="label">ABOUT<span class="cursor"></span></div>
-    </div>
+      <h1 class="title">
+        <span class="c-red">TYR</span><span class="c-yellow">OMAN</span><span class="c-blue">IAC</span>
+      </h1>
 
-    <div class="box">
-      <div class="label">PROJECTS<span class="cursor"></span></div>
-    </div>
-
-    <div class="box">
-      <div class="label">CONTACT<span class="cursor"></span></div>
+      <button class="nav-word right tri-text" data-target="projects">PROJECTS</button>
     </div>
   </div>
 
+  <footer class="socials">
+    <a class="social-icon" href="https://twitter.com/teawithtiger_" target="_blank" rel="noopener" aria-label="Twitter">
+      <span class="icon-mask" style="--icon:url('assets/twitter-logo.png');"></span>
+    </a>
+    <a class="social-icon" href="https://www.youtube.com/@teawithtiger_" target="_blank" rel="noopener" aria-label="YouTube">
+      <span class="icon-mask" style="--icon:url('assets/youtube-logo.png');"></span>
+    </a>
+    <a class="social-icon" href="https://discord.com/invite/DxAtuN2EuC" target="_blank" rel="noopener" aria-label="Discord">
+      <span class="icon-mask" style="--icon:url('assets/discord-logo.png');"></span>
+    </a>
+    <a class="social-icon" href="https://twitch.tv/teawithtiger" target="_blank" rel="noopener" aria-label="Twitch">
+      <span class="icon-mask" style="--icon:url('assets/twitch-logo.png');"></span>
+    </a>
+    <a class="social-icon secret" href="#" target="_blank" rel="noopener" aria-label="???" tabindex="-1">
+      <span class="icon-mask" style="--icon:url('assets/secret-logo.png');"></span>
+    </a>
+  </footer>
+
+  <div id="secretSpot" aria-hidden="true"></div>
+
+  <div class="backdrop" id="backdrop"></div>
+  <div class="popup" id="popup" role="dialog" aria-modal="true" aria-hidden="true">
+    <button class="close-btn" id="closeBtn" aria-label="Close">&times;</button>
+    <h2 id="popupTitle"></h2>
+    <div id="popupContent"></div>
+  </div>
+
+<script>
+  const sections = {
+    about: {
+      title: "ABOUT",
+      html: "<p>Placeholder about text goes here.</p>"
+    },
+    projects: {
+      title: "PROJECTS",
+      html: "<p>Placeholder project list goes here.</p>"
+    }
+  };
+
+  // Cycle r/y/b palette
+
+  function colorize(el){
+    const text = el.textContent;
+    const colors = ['c-red','c-yellow','c-blue'];
+    el.innerHTML = [...text].map((ch, i) =>
+      `<span class="${colors[i % 3]}">${ch}</span>`
+    ).join('');
+  }
+  document.querySelectorAll('.tri-text').forEach(colorize);
+
+  const popup      = document.getElementById('popup');
+  const backdrop    = document.getElementById('backdrop');
+  const popupTitle  = document.getElementById('popupTitle');
+  const popupContent= document.getElementById('popupContent');
+  const closeBtn    = document.getElementById('closeBtn');
+  const navWords    = document.querySelectorAll('.nav-word');
+
+  let currentKey = null;
+
+  function openSection(key, btn){
+    if(currentKey === key && popup.classList.contains('open')){
+      closePopup();
+      return;
+    }
+    const data = sections[key];
+    if(!data) return;
+
+    popupTitle.textContent = data.title;
+    popupContent.innerHTML = data.html;
+    currentKey = key;
+
+    popup.classList.add('open');
+    popup.setAttribute('aria-hidden','false');
+    backdrop.classList.add('open');
+
+    navWords.forEach(w => w.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function closePopup(){
+    popup.classList.remove('open');
+    popup.setAttribute('aria-hidden','true');
+    backdrop.classList.remove('open');
+    navWords.forEach(w => w.classList.remove('active'));
+    currentKey = null;
+  }
+
+  navWords.forEach(btn=>{
+    btn.addEventListener('click', () => openSection(btn.dataset.target, btn));
+  });
+
+  closeBtn.addEventListener('click', closePopup);
+  backdrop.addEventListener('click', closePopup);
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') closePopup();
+  });
+
+  const secretSpot = document.getElementById('secretSpot');
+  const secretIcon = document.querySelector('.social-icon.secret');
+  secretSpot.addEventListener('click', () => {
+    secretIcon.classList.add('revealed');
+    secretIcon.removeAttribute('tabindex');
+  });
+</script>
 </body>
 </html>
