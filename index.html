@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MAIN</title>
 <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/edit-undo-brk" rel="stylesheet">
 <style>
   :root{
     --red:    #f70000;
@@ -104,7 +105,7 @@
 
   h1.title{
     grid-area:title;
-    font-family:'Press Start 2P', monospace;
+    font-family:'Edit Undo BRK', monospace;
     text-align:center;
     font-size: clamp(1.2rem, 4.6vw, 2.6rem);
     letter-spacing: 2px;
@@ -113,16 +114,16 @@
     user-select:none;
   }
 
-  .c-red    { color: var(--red);    text-shadow: 0 0 6px rgba(237,28,36,0.7), 2px 0 var(--blue), -2px 0 var(--yellow); }
-  .c-yellow { color: var(--yellow); text-shadow: 0 0 6px rgba(255,242,0,0.7), 2px 0 var(--red),  -2px 0 var(--blue); }
-  .c-blue   { color: var(--blue);   text-shadow: 0 0 6px rgba(63,72,204,0.8),  2px 0 var(--yellow),-2px 0 var(--red); }
+  .c-red    { color: var(--red);    text-shadow: 0 0 6px color-mix(in srgb, var(--red) 70%, transparent),    2px 0 var(--blue), -2px 0 var(--yellow); }
+  .c-yellow { color: var(--yellow); text-shadow: 0 0 6px color-mix(in srgb, var(--yellow) 70%, transparent), 2px 0 var(--red),  -2px 0 var(--blue); }
+  .c-blue   { color: var(--blue);   text-shadow: 0 0 6px color-mix(in srgb, var(--blue) 80%, transparent),   2px 0 var(--yellow),-2px 0 var(--red); }
 
   .nav-word{
     background:none;
     border:none;
     padding:6px 2px;
     cursor:pointer;
-    font-family:'Press Start 2P', monospace;
+    font-family:'Edit Undo BRK', monospace;
     font-size: clamp(0.6rem, 1.6vw, 0.9rem);
     letter-spacing:2px;
     line-height:1.6;
@@ -202,7 +203,7 @@
     background:none;
     border:none;
     color: var(--dim);
-    font-family:'Press Start 2P', monospace;
+    font-family:'Edit Undo BRK', monospace;
     font-size:1rem;
     cursor:pointer;
     line-height:1;
@@ -211,7 +212,7 @@
   .popup .close-btn:hover{ color:#fff; }
 
   .popup h2{
-    font-family:'Press Start 2P', monospace;
+    font-family:'Edit Undo BRK', monospace;
     font-size:1rem;
     letter-spacing:2px;
     margin: 0 0 1.2rem;
@@ -222,6 +223,83 @@
     line-height:1.5;
     color:#ccc;
     margin:0 0 1rem;
+  }
+
+  .popup .highlight{
+    color: var(--red)
+  }
+
+  .popup .kicker{
+    color: var(--red);
+    font-size:1.1rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin: 0 0 1rem;
+  }
+
+  .popup a{
+    color: var(--blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.15s ease;
+  }
+  .popup a:hover, .popup a:focus-visible{
+    color: var(--yellow);
+  }
+
+  .project-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+  }
+  .project-list li{
+    padding: 0 0 1.2rem;
+    margin: 0 0 1.2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .project-list li:last-child{
+    border-bottom:none;
+    margin-bottom:0;
+    padding-bottom:0;
+  }
+  .project-list h3{
+    font-family:'Edit Undo BRK', monospace;
+    color: var(--red);
+    font-size:1.1rem;
+    letter-spacing:1px;
+    margin:0 0 0.5rem;
+  }
+  .project-list p{
+    margin:0 0 0.6rem;
+  }
+  .project-list a{
+    font-size:1.2rem;
+  }
+
+  .project-links{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap: 0.4rem 1.2rem;
+    margin-top: 0.2rem;
+  }
+
+  /* Download links get their own look — a small bordered button in the
+     yellow tone, rather than a plain underlined link — so it reads as
+     an action, not just a reference. */
+  .project-links a.download{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding: 3px 10px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .project-links a.download:hover, .project-links a.download:focus-visible{
+    background: var(--yellow);
+    color: var(--black);
   }
 
   /* ---------- SOCIAL ICONS ---------- */
@@ -344,11 +422,26 @@
   const sections = {
     about: {
       title: "ABOUT",
-      html: "<p>Placeholder about text goes here.</p>"
+      html: `
+        <p class="kicker">// currently brewing</p>
+        <p>Hey! My name is <span class="kicker">teawithtiger, Tiger, Tyromaniac</span> or otherwise. I do a lot of creative stuff, wherein I end up making tools to ease my process. I thought I needed a little place to share them, so here they are! If you're interested, go to "Projects" on the right, you will find download links for (almost) any of them.</p>
+        <p>If you have any questions or concerns, catch me on my socials down below, or <a href="mailto:mail@tyromaniac.com">send an email</a>!</p>
+      `
     },
     projects: {
       title: "PROJECTS",
-      html: "<p>Placeholder project list goes here.</p>"
+      html: `
+        <ul class="project-list">
+          <li>
+            <h3>D'Hondt Parliament Calculator</h3>
+            <p>A python-based calculator for parliament seat distributions. Works for any number of seats, parties, votes, etc. Uses the <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/D%27Hondt_method">D'Hondt</a> algorithm to assign seats.</p>
+            <div class="project-links">
+              <a href="https://github.com/tyro-maniac/dhondt" target="_blank" rel="noopener">&rarr; view project</a>
+              <a class="download" href="downloads/dhondt.py" download="dhondt.py">&darr; download .py</a>
+            </div>
+          </li>
+        </ul>
+      `
     }
   };
 
